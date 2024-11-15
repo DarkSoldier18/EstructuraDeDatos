@@ -1,4 +1,3 @@
-
 public class ListaSE<T> implements Lista<T> {
     private NodoSE<T> inicio;
 
@@ -10,22 +9,34 @@ public class ListaSE<T> implements Lista<T> {
         return inicio == null;
     }
 
-    public void insertar(T dato) {
-        NodoSE<T> nuevo = new NodoSE<T>(dato);
+    public int longitud() {
+        int res = 0;
+        if (!vacia()) {
+            NodoSE<T> aux = inicio;
+            while (aux.getSig() != null) {
+                res++;
+                aux = aux.getSig();
+            }
+        }
+        return res + 1;
+    }
+
+    public void insertar(T d) {
+        NodoSE<T> nuevo = new NodoSE<>(d);
         if (vacia()) {
             inicio = nuevo;
         } else {
-            NodoSE<T> ac = inicio;
-            while (ac.getSig() != null) {
-                ac = ac.getSig();// avanzar
+            NodoSE<T> aux = inicio;
+            while (aux.getSig() != null) {
+                aux = aux.getSig();
             }
-            ac.setSig(nuevo);
+            aux.setSig(nuevo);
         }
     }
 
-    public void insertar(T dato, int pos) {
+    public void insertar(T d, int pos) {
         if (pos <= longitud()) {
-            NodoSE<T> nuevo = new NodoSE<T>(dato);
+            NodoSE<T> nuevo = new NodoSE<T>(d);
             if (vacia()) {
                 inicio = nuevo;
             } else {
@@ -33,14 +44,13 @@ public class ListaSE<T> implements Lista<T> {
                     nuevo.setSig(inicio);
                     inicio = nuevo;
                 } else {
-                    NodoSE<T> ac = inicio;
-                    while (ac.getSig() != null && pos > 1) {
-                        ac = ac.getSig();
-                        pos--;
+                    NodoSE<T> actual = inicio;
+                    for (int i = 0; i < pos - 1; i++) {
+                        actual = actual.getSig();
                     }
-                    nuevo.setSig(ac.getSig());
-                    ac.setSig(nuevo);
-
+                    NodoSE<T> auxi = actual.getSig();
+                    nuevo.setSig(auxi);
+                    actual.setSig(nuevo);
                 }
             }
         }
@@ -55,121 +65,141 @@ public class ListaSE<T> implements Lista<T> {
     }
 
     public void insertar(Lista<T> l, int pos) {
+
     }
 
     public T eliminar(int pos) {
-        return null;
+        T dato = null;
+        if (pos < longitud() - 1) {
+            if (!vacia()) {
+                if (pos == 0) {
+                    dato = inicio.getDato();
+                    inicio = inicio.getSig();
+                } else {
+
+                    NodoSE<T> actual = inicio;
+                    for (int i = 0; i < pos - 1; i++) {
+                        actual = actual.getSig();
+                    }
+                    NodoSE<T> auxi = actual.getSig();
+                    actual.setSig(auxi.getSig());
+                    dato = auxi.getDato();
+                }
+            }
+        }
+        return dato;
     }
 
     public boolean eliminar(T d) {
         boolean res = false;
-        if (!vacia()) {
-            NodoSE<T> ac = inicio, ant = null;
-            while (!res && ac != null) {
-                if (d.equals(ac.getDato())) {
-                    res = true;
-                    if (ac == inicio)
-                        inicio = inicio.getSig();
-                    else {
-                        ant.setSig(ac.getSig());
-                    }
-                } else {
-                    ant = ac;
-                    ac = ac.getSig();
+        NodoSE<T> actual = inicio;
+        NodoSE<T> anterior = inicio;
+        while (actual.getSig() != null) {
+            if (actual.getDato() == d) {
+                res = true;
+                break;
+            } else {
+                anterior = actual;
+                actual = actual.getSig();
+            }
+        }
+        NodoSE<T> sig = actual.getSig();
+        if (sig.getDato() == d) {
+            res = true;
+        }
+        if (res) {
+            anterior.setSig(actual.getSig());
+        }
+        return res;
+    }
+    public void eliminarTodo(){
+        inicio=null;
+    }
+    public T acceder(int pos){                      //metodo para acceder a los datos de la lista
+        T res=null;
+        if (pos<longitud()) {                       // verifica que la posicion solicitada este dentro de la lista
+            if (!vacia()) {                         // verifica que la lista no este vacia
+                NodoSE<T> actual=inicio;            // actual es un puntero que ira avanzando nodo por nodo hasta llegar a la posicion
+                int cont=0;
+                while(cont<=pos){                   //esta iteracion hace que el puntero se desplace hasta la posicion que queremos
+                    actual=actual.getSig();
                 }
+                res=actual.getDato();               // esta variable almacena el dato que hay en el puntero
+            }
+        }
+        return res;                                 // devuelve el dato almacenado en res
+    }
+    public boolean buscar(T d){                     // busca un elemento en la lista
+        boolean res=false;                          // variable bandera que indica que el dato existe en la lista
+        NodoSE<T> actual = inicio;                  // Nodo puntero que avanza en la lista con cada iteracion
+        while (actual.getSig()!=null) {             // itera hasta llegar al final de la lista
+            if (actual.getDato()==d) {              // si el dato se encuentra en el puntero actualiza la variable bandera y sale del bucle
+                res=true;
+                break;
+            }else{                                  //si no, el puntero avanza al siguiente nodo
+                actual=actual.getSig();
             }
         }
         return res;
     }
 
-    public void eliminarTodo() {
-    }
-
-    public Lista<T> eliminar(int inf, int sup) {
-        return null;
-    }
-
-    public Lista<T> eliminarTodas(T d) {
-        return null;
-    }
-
-    public T acceder(int pos) {
-        T res = null;
-        if (pos < longitud()) {
-            NodoSE<T> ac = inicio;
-            while (pos > 0) {
-                ac = ac.getSig();
-                pos--;
+    public int indiceDe(T d){
+        int cont=0;
+        NodoSE<T> actual = inicio;
+        while (actual.getSig()!=null){
+            if (actual.getDato()==d) {
+                break;
+            }else{
+                cont++;
+                actual=actual.getSig();
             }
-            res = ac.getDato();
         }
-        return res;
+        return cont;
     }
-
-    public Lista<T> acceder(int inf, int sup) {
-        return null;
+    public void cambiarValor(T d, int pos){
+        NodoSE<T> actual=inicio;
+        if (pos<longitud()){
+            int cont=0;
+            while (cont<=pos) {
+                cont++;
+                actual=actual.getSig();
+            }
+        }
+        actual.setDato(d);
     }
-
-    public int longitud() {
-        int res = 0;
+    public void intercambiar(int orig, int dest){
+        if (dest<longitud() && orig<longitud()) {
+            T dato1= acceder(orig);
+            T dato2= acceder(dest);
+            cambiarValor(dato2,orig);
+            cambiarValor(dato1, dest);
+        }
+    }
+    public String serializar(){
+        String res="";
         if (!vacia()) {
-            NodoSE<T> ac = inicio;
-            while (ac != null) {
-                res = res + 1;
-                ac = ac.getSig();
+            NodoSE<T> actual=inicio;
+            while (actual.getSig()!=null) {
+                res=res+actual.getDato();
+                actual=actual.getSig();
             }
         }
         return res;
     }
-
-    public boolean buscar(T d) {
-        boolean encontrado = false;
-        if (!vacia()) {
-            NodoSE<T> ac = inicio;
-            do {
-                if (d.equals(ac.getDato())) {
-                    encontrado = true;
-                } else {
-                    ac = ac.getSig();
-                }
-            } while (!encontrado && ac != null);
-        }
-        return encontrado;
-    }
-
-    public int indiceDe(T d) {
-        return -1;
-    }
-
-    public Lista<Integer> indiceDeTodas(T d) {
+    public Lista<T> eliminar(int inf, int sup){
         return null;
     }
 
-    public void establecer(T d, int pos) {
-        if (pos < longitud()) {
-            NodoSE<T> ac = inicio;
-            while (pos > 0) {
-                ac = ac.getSig();
-                pos--;
-            }
-            ac.setDato(d);
-        }
+    public Lista<T> eliminarTodas(T d){
+        return null;
     }
-
-    public void intercambiar(int orig, int dest) {
-        if (orig < dest && dest < longitud()) {
-            T dOrigen = acceder(orig), dDestino = acceder(dest);
-            establecer(dDestino, orig);
-            establecer(dOrigen, dest);
-        }
+    public Lista<T> acceder(int inf, int sup){
+        return null;
     }
-
-    public String serializar() {
-        return "";
+    public Lista<Integer> indiceDeTodas(T d){
+        return null;
     }
-
-    public Lista<Lista<T>> split(int n) {
-        Lista<Lista<T>> res = new ListaSE<Lista<T>>();
-        return res;
+    public Lista< Lista <T> > split(int n){
+        return null;
     }
 }
