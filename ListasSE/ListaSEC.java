@@ -1,46 +1,50 @@
-public class ListaSE<T> implements Lista<T> {
+public class ListaSEC<T> {
     private NodoSE<T> inicio;
-
-    public ListaSE() {
-        inicio = null;
-    }
+    private NodoSE<T> ultimo;
 
     public boolean vacia() {
         return inicio == null;
     }
 
-    public int longitud() {
-        int res = 0;
-        if (!vacia()) {
-            NodoSE<T> aux = inicio;
-            while (aux.getSig() != null) {
-                res++;
-                aux = aux.getSig();
-            }
-        }
-        return res + 1;
-    }
-
-    public void insertar(T d) {
-        NodoSE<T> nuevo = new NodoSE<>(d);
+    public void insertar(T dato) {
+        NodoSE<T> nuevo = new NodoSE<T>(dato);
         if (vacia()) {
             inicio = nuevo;
+            inicio.setSig(inicio);
+            ultimo = nuevo;
         } else {
-            NodoSE<T> aux = inicio;
-            while (aux.getSig() != null) {
-                aux = aux.getSig();
+            NodoSE<T> actual = inicio;
+            while (actual.getSig() != inicio) {
+                actual = actual.getSig();
             }
-            aux.setSig(nuevo);
+            actual.setSig(nuevo);
+            nuevo.setSig(inicio);
+            ultimo = nuevo;
         }
     }
 
-    public void insertar(T d, int pos) {
-        if (pos <= longitud()) {
-            NodoSE<T> nuevo = new NodoSE<T>(d);
+    public int longitud() {
+        int lon = 0;
+        if (!vacia()) {
+            NodoSE<T> actual = inicio;
+            do {
+                lon++;
+                actual = actual.getSig();
+            } while (actual != inicio);
+        }
+        return lon;
+    }
+
+    public void insertar(T dato, int pos) {
+        if (pos < longitud()) {
+            NodoSE<T> nuevo = new NodoSE<T>(dato);
             if (vacia()) {
                 inicio = nuevo;
+                inicio.setSig(inicio);
+                ultimo = inicio;
             } else {
                 if (pos == 0) {
+                    ultimo.setSig(nuevo);
                     nuevo.setSig(inicio);
                     inicio = nuevo;
                 } else {
@@ -48,9 +52,15 @@ public class ListaSE<T> implements Lista<T> {
                     for (int i = 0; i < pos - 1; i++) {
                         actual = actual.getSig();
                     }
-                    NodoSE<T> auxi = actual.getSig();
-                    nuevo.setSig(auxi);
-                    actual.setSig(nuevo);
+                    NodoSE<T> aux = actual.getSig();
+                    if (aux.getSig() == ultimo) {
+                        actual.setSig(nuevo);
+                        nuevo.setSig(aux);
+                        ultimo = nuevo;
+                    } else {
+                        nuevo.setSig(aux);
+                        actual.setSig(nuevo);
+                    }
                 }
             }
         }
@@ -58,52 +68,64 @@ public class ListaSE<T> implements Lista<T> {
 
     public void insertarInicio(T dato) {
         NodoSE<T> nuevo = new NodoSE<T>(dato);
-        if (!vacia()) {
+        if (vacia()) {
+            inicio = nuevo;
+            inicio.setSig(inicio);
+            ultimo = inicio;
+        } else {
             nuevo.setSig(inicio);
+            ultimo.setSig(nuevo);
+            inicio = nuevo;
         }
-        inicio = nuevo;
-    }
-
-    public void eliminarTodo() {
-        inicio = null;
     }
 
     public T eliminar(int pos) {
         T dato = null;
         if (pos < longitud()) {
-            if (!vacia()) {
-                if (pos == 0) {
-                    dato = inicio.getDato();
-                    inicio = inicio.getSig();
+            if (pos == 0) {
+                dato = inicio.getDato();
+                inicio = inicio.getSig();
+                ultimo.setSig(inicio);
+            } else {
+                NodoSE<T> actual = inicio;
+                NodoSE<T> anterior = null;
+                for (int i = 0; i < pos; i++) {
+                    anterior = actual;
+                    actual = actual.getSig();
+                }
+                dato = actual.getDato();
+                if (actual.getSig() == inicio) {
+                    anterior.setSig(inicio);
+                    ultimo = anterior;
                 } else {
-                    NodoSE<T> actual = inicio;
-                    for (int i = 0; i < pos - 1; i++) {
-                        actual = actual.getSig();
-                    }
-                    NodoSE<T> auxi = actual.getSig();
-                    actual.setSig(auxi.getSig());
-                    dato = auxi.getDato();
+                    anterior.setSig(actual.getSig());
                 }
             }
         }
         return dato;
     }
 
-    public boolean eliminar(T d) {
+    public boolean eliminar(T dato) {
         boolean eliminado = false;
         if (!vacia()) {
-            if (inicio.getSig() == null) {
+            if (inicio == ultimo) {
                 inicio = null;
+                ultimo = null;
                 eliminado = true;
             } else {
                 NodoSE<T> actual = inicio;
                 NodoSE<T> anterior = null;
                 do {
-                    if (actual.getDato().equals(d)) {
-                        if (actual == inicio) {
+                    if (actual.getDato().equals(dato)) {
+                        if (anterior == null) {
                             inicio = inicio.getSig();
+                            ultimo.setSig(inicio);
                         } else {
-                            anterior.setSig(actual.getSig());
+                            if (actual == ultimo) {
+                                anterior.setSig(inicio);
+                            } else {
+                                anterior.setSig(actual.getSig());
+                            }
                         }
                         eliminado = true;
                         break;
@@ -111,10 +133,17 @@ public class ListaSE<T> implements Lista<T> {
                         anterior = actual;
                         actual = actual.getSig();
                     }
-                } while (actual != null);
+                } while (actual != inicio);
             }
         }
         return eliminado;
+    }
+
+    public void eliminarTodo() {
+        if (!vacia()) {
+            inicio = null;
+            ultimo = null;
+        }
     }
 
     public T acceder(int pos) {
@@ -136,21 +165,21 @@ public class ListaSE<T> implements Lista<T> {
     public boolean buscar(T d) {
         boolean res = false;
         NodoSE<T> actual = inicio;
-        while (actual != null) {
+        do {
             if (actual.getDato().equals(d)) {
                 res = true;
                 break;
             } else {
                 actual = actual.getSig();
             }
-        }
+        } while (actual != inicio);
         return res;
     }
 
     public int indiceDe(T d) {
         int cont = 0;
         NodoSE<T> actual = inicio;
-        while (actual.getSig() != null) {
+        while (actual.getSig() != inicio) {
             if (actual.getDato() == d) {
                 break;
             } else {
@@ -189,32 +218,8 @@ public class ListaSE<T> implements Lista<T> {
             do {
                 res = res + actual.getDato();
                 actual = actual.getSig();
-            } while (actual != null);
+            } while (actual != inicio);
         }
         return res;
-    }
-
-    public void insertar(Lista<T> l, int pos) {
-
-    }
-
-    public Lista<T> eliminar(int inf, int sup) {
-        return null;
-    }
-
-    public Lista<T> eliminarTodas(T d) {
-        return null;
-    }
-
-    public Lista<T> acceder(int inf, int sup) {
-        return null;
-    }
-
-    public Lista<Integer> indiceDeTodas(T d) {
-        return null;
-    }
-
-    public Lista<Lista<T>> split(int n) {
-        return null;
     }
 }
